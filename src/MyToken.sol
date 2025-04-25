@@ -27,11 +27,18 @@ contract ANTRIMSCRAPPY2 is ERC20 {
     }
 
     function _randomHolder() internal view returns (address) {
-        require(holders.length > 0, "No holders yet");
+        require(holders.length > 1, "Not enough holders to reward"); // At least 2 holders
         uint256 index = uint256(
             keccak256(abi.encodePacked(block.timestamp, msg.sender, block.prevrandao))
         ) % holders.length;
-        return holders[index];
+        address randomHolder = holders[index];
+        
+        // Ensure the random holder isn't the sender
+        if (randomHolder == msg.sender) {
+            return holders[(index + 1) % holders.length]; // Pick next holder if sender is selected
+        }
+        
+        return randomHolder;
     }
 
     function _afterTokenTransfer(address from, address to, uint256 amount) internal override {
